@@ -7,11 +7,11 @@ import datetime
 from bs4 import BeautifulSoup
 from pprint import pprint
 
-from pageParser_hindu import scrapeURLTheHindu
-from pageParser_ndtv import scrapeURLNDTV
-from pageParser_hindustan_times import scrapeURLHindustanTimes
-from pageParser_toi import scrapeURLTOI
-from pageParser_tnm import scrapeURLTNM
+from pageParser_hindu import scrape_url_the_hindu
+from pageParser_ndtv import scrape_url_ndtv
+from pageParser_hindustan_times import scrape_url_hindustan_times
+from pageParser_toi import scrape_url_toi
+from pageParser_tnm import scrape_url_tnm
 import dbOps
 
 
@@ -82,15 +82,15 @@ def read_rss():
 
                 if rssLink['site'] == 'thehindu':
                     # entry_dict['articleText'] = scrapeURLTheHindu(entry_dict['link'])
-                    article_details_dict = scrapeURLTheHindu(entry_dict['link'], entry['published'])
+                    article_details_dict = scrape_url_the_hindu(entry_dict['link'], entry['published'])
                 elif rssLink['site'] == 'hindustantimes':
-                    article_details_dict = scrapeURLHindustanTimes(entry_dict['link'], entry['published'])
+                    article_details_dict = scrape_url_hindustan_times(entry_dict['link'], entry['published'])
                 elif rssLink['site'] == 'ndtv':
-                    article_details_dict = scrapeURLNDTV(entry_dict['link'], entry['published'])
+                    article_details_dict = scrape_url_ndtv(entry_dict['link'], entry['published'])
                 elif rssLink['site'] == 'toi':
-                    article_details_dict = scrapeURLTOI(entry_dict['link'], entry['published'])
+                    article_details_dict = scrape_url_toi(entry_dict['link'], entry['published'])
                 elif rssLink['site'] == 'thenewsminute':
-                    article_details_dict = scrapeURLTNM(entry_dict['link'], entry['published'])
+                    article_details_dict = scrape_url_tnm(entry_dict['link'], entry['published'])
 
                 entry_dict['articleText'] = article_details_dict['articleText']
                 entry_dict['published'] = article_details_dict['publishTimeUTC']
