@@ -1,0 +1,21 @@
+https://www.thehindu.com/rssfeeds/
+https://www.thehindu.com/news/national/feeder/default.rss
+------------------------------------------------------------------------------
+
+https://timesofindia.indiatimes.com/rss.cms
+https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms
+------------------------------------------------------------------------------
+https://www.ndtv.com/rss
+NDTv India: https://feeds.feedburner.com/ndtvnews-india-news
+------------------------------------------------------------------------------
+https://www.hindustantimes.com/rss
+https://www.hindustantimes.com/rss/india/rssfeed.xml
+------------------------------------------------------------------------------
+TO DO
+------------------------------------------------------------------------------
+
+https://www.thenewsminute.com/rss-feeds
+https://www.thenewsminute.com/news.xml
+------------------------------------------------------------------------------
+https://www.deccanchronicle.com/rss_feed/
+------------------------------------------------------------------------------
