@@ -86,7 +86,6 @@ def read_rss():
             # Else do DB ops.
             # if os.uname()[4].startswith("arm"):
                 # check if ID already present in db. If yes, do not scrap URL and upsert
-            # print(entry_dict['_id'])
 
             if not dbOps.checkDBforId(entry_dict['_id']) and not os.uname()[4].startswith("arm"):
             # if not os.uname()[4].startswith("arm"):
@@ -99,7 +98,7 @@ def read_rss():
                 dbOps.upsertToDB(entry_dict)
 
 
-            if not os.uname()[4].startswith("arm") and entry_dict['_id'] not in id_list_from_file:
+            if  os.uname()[4].startswith("arm") and entry_dict['_id'] not in id_list_from_file:
                 print('datafile parse needed: ' + entry_dict['_id'])
 
                 article_details_dict = get_article_details(rssLink['site'], entry_dict['link'], entry['published'])
