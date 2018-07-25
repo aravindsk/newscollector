@@ -1,4 +1,5 @@
 import sys
+import ast
 import copy
 import feedparser
 import requests
@@ -7,6 +8,16 @@ import datetime
 import os
 from bs4 import BeautifulSoup
 from pprint import pprint
+from time import gmtime, strftime
+
+from bson import Binary, Code
+# from bson.json_util import dumps , RELAXED_JSON_OPTIONS,STRICT_JSON_OPTIONS
+# from bson import json_util
+from bson import json_util, EPOCH_AWARE, EPOCH_NAIVE, SON
+from bson.json_util import (DatetimeRepresentation,
+                            STRICT_JSON_OPTIONS)
+
+import json
 
 from pageParser_hindu import scrape_url_the_hindu
 from pageParser_ndtv import scrape_url_ndtv
@@ -64,7 +75,9 @@ def read_rss():
     ]
 
     for rssLink in feed_url_list:
+
         id_list_from_file = dataFileOps.get_id_list_from_data_file(rssLink['site'])
+        filename_ts = strftime("_%Y_%m_%d_%H_%M", gmtime())
         entries_list = list()
         entry_dict = dict()
         d = feedparser.parse(rssLink['url'])
@@ -86,30 +99,38 @@ def read_rss():
             # Else do DB ops.
             # if os.uname()[4].startswith("arm"):
                 # check if ID already present in db. If yes, do not scrap URL and upsert
+            if not os.uname()[4].startswith("arm") and entry_dict['_id'] not in id_list_from_file:
+                print('datafile parse needed: ' + entry_dict['_id'])
 
-            if not dbOps.checkDBforId(entry_dict['_id']) and not os.uname()[4].startswith("arm"):
+                article_details_dict = get_article_details(rssLink['site'], entry_dict['link'], entry['published'])
+                entry_dict['articleText'] = article_details_dict['articleText']
+                # entry_dict['published'] = article_details_dict['publishTimeUTC']
+
+                #fix needed for timezone conversion. now storing as GMT?
+                temp_string = json_util.dumps(article_details_dict['publishTimeUTC'], json_options=json_util.JSONOptions(tz_aware=True))
+                #convert string to dict and store
+                entry_dict['published'] = ast.literal_eval(temp_string)
+                entry_dict['dataInsertType'] = 'fileImportToDB'
+
+                #build list of dicts to be written to JSON file
+                temp_dict = copy.deepcopy(entry_dict)
+                entries_list.append(temp_dict)
+
+            elif not dbOps.checkDBforId(entry_dict['_id']) and not os.uname()[4].startswith("arm"):
             # if not os.uname()[4].startswith("arm"):
                 print('mongo parse needed: ' + entry_dict['_id'])
 
                 article_details_dict = get_article_details(rssLink['site'], entry_dict['link'], entry['published'])
                 entry_dict['articleText'] = article_details_dict['articleText']
                 entry_dict['published'] = article_details_dict['publishTimeUTC']
+                entry_dict['dataInsertType'] = 'directWriteToDB'
                 #write each dict to DB. Consider bulk writing a list
                 dbOps.upsertToDB(entry_dict)
 
 
-            if  os.uname()[4].startswith("arm") and entry_dict['_id'] not in id_list_from_file:
-                print('datafile parse needed: ' + entry_dict['_id'])
-
-                article_details_dict = get_article_details(rssLink['site'], entry_dict['link'], entry['published'])
-                entry_dict['articleText'] = article_details_dict['articleText']
-                entry_dict['published'] = article_details_dict['publishTimeUTC']
-                temp_dict = copy.deepcopy(entry_dict)
-                entries_list.append(temp_dict)
-
-        #if list not empty, write to file
+        # if list not empty, write to file
         if len(entries_list)>0:
-            dataFileOps.write_to_data_file(entries_list)
+            dataFileOps.write_to_data_file(entries_list,filename_ts)
 
 if __name__ == '__main__':
     read_rss()
