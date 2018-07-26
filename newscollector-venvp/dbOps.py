@@ -31,6 +31,7 @@ def upsertToDB(entryDict):
                                                                 'published' : entryDict['published'],
                                                                 'summary':entryDict['summary'],
                                                                 'link' : entryDict['link'],
+                                                                'dataInsertType':entryDict['dataInsertType'],
                                                                 'logInsertTime' : (datetime.datetime.utcnow())
                                                                 }
                                             

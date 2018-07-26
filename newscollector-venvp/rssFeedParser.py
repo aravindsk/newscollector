@@ -63,7 +63,7 @@ def get_article_id(source_site, input_url):
 
 
 def read_rss():
-
+    article_id_list = list()
     feed_url_list = [
         {'site': 'thehindu', 'url': 'https://www.thehindu.com/news/national/feeder/default.rss'}
         ,
@@ -74,10 +74,14 @@ def read_rss():
         {'site': 'thenewsminute', 'url': 'https://www.thenewsminute.com/news.xml'}
     ]
 
+    #get list of articles already processed and saved
+    id_list_from_file = dataFileOps.get_article_id_from_file()
+
     for rssLink in feed_url_list:
 
-        id_list_from_file = dataFileOps.get_id_list_from_data_file(rssLink['site'])
+        # id_list_from_file = dataFileOps.get_id_list_from_data_file(rssLink['site'])
         filename_ts = strftime("_%Y_%m_%d_%H_%M", gmtime())
+
         entries_list = list()
         entry_dict = dict()
         d = feedparser.parse(rssLink['url'])
@@ -110,13 +114,16 @@ def read_rss():
                 temp_string = json_util.dumps(article_details_dict['publishTimeUTC'], json_options=json_util.JSONOptions(tz_aware=True))
                 #convert string to dict and store
                 entry_dict['published'] = ast.literal_eval(temp_string)
+                entry_dict['logInsertTime'] = ast.literal_eval(json_util.dumps(datetime.datetime.utcnow(), json_options=json_util.JSONOptions(tz_aware=True)))
                 entry_dict['dataInsertType'] = 'fileImportToDB'
 
                 #build list of dicts to be written to JSON file
                 temp_dict = copy.deepcopy(entry_dict)
                 entries_list.append(temp_dict)
 
-            elif not dbOps.checkDBforId(entry_dict['_id']) and not os.uname()[4].startswith("arm"):
+                article_id_list.append(temp_dict['_id'])
+
+            if not dbOps.checkDBforId(entry_dict['_id']) and not os.uname()[4].startswith("arm"):
             # if not os.uname()[4].startswith("arm"):
                 print('mongo parse needed: ' + entry_dict['_id'])
 
@@ -131,6 +138,9 @@ def read_rss():
         # if list not empty, write to file
         if len(entries_list)>0:
             dataFileOps.write_to_data_file(entries_list,filename_ts)
+
+        #update article_id file for lookup in next run
+        dataFileOps.file_update_article_id(article_id_list)
 
 if __name__ == '__main__':
     read_rss()
