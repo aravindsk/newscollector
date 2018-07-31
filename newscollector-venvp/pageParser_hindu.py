@@ -27,3 +27,16 @@ def scrape_url_the_hindu(input_url, published_time):
     except Exception as e:
         article_info['articleText'] = "Error in page parsing"
         return article_info
+
+def get_all_rss_feel_links(input_url):
+    try:
+        all_site_url_list = list()
+
+        page = requests.get(input_url)
+        news_page = BeautifulSoup(page.text, 'html.parser')
+        for link in news_page.find("ul",class_="padl").findAll("a"):
+            if link['href'].rsplit('.', maxsplit=1)[-1] == 'rss':
+                all_site_url_list.append(link['href'])
+        return all_site_url_list
+    except Exception as e:
+        raise
